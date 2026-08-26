@@ -1,0 +1,11 @@
+//Java 17
+# 语言声明头测试：第一行声明使用 Java 17 语法
+# 语法名与版本号之间必须有空格（//Java17 不会被识别为声明头）
+
+let message = "声明头工作正常";
+print(message);
+
+func square(x) {
+    return x * x;
+}
+print("5 的平方 =", square(5));

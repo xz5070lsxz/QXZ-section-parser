@@ -1,0 +1,3 @@
+//Python 3
+# 声明使用 Python 3 语法——当前 QZ 未注册该解析器，应报错提示
+print("这段程序声明为 Python 语法");
