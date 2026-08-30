@@ -96,4 +96,3 @@ print(app_config["name"]);
 ```
 
 详见 [docs/语法规范.md](docs/语法规范.md)。
-*（内容由AI生成，仅供参考）*
