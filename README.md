@@ -1,16 +1,3 @@
----
-AIGC:
-    Label: "1"
-    ContentProducer: 001191440300708461136T1XGW3
-    ProduceID: fc9cc4777fe5c58ed1ba1eb59b80943b_0f245660b8b411f1a1bf52540064ee0f
-    ReservedCode1: o/Y5SXkjozp+TV40TlTXoO7UHAZBufkn4P1fZoEltmGtbw6sfTGduhC4P7Wjj8zu70lwtyoSE6txSIiPalEvgyHOuu6wgV03RJ13v61O4TV/Shaica0Q4feqP6jOc/ocku0CpKeVwYCrIFrsbOgRI7OqRkWfC1ZN+OA98mKjtWJpUpm0+cjHgU3LAkM=
-    ContentPropagator: 001191440300708461136T1XGW3
-    PropagateID: fc9cc4777fe5c58ed1ba1eb59b80943b_0f245660b8b411f1a1bf52540064ee0f
-    ReservedCode2: o/Y5SXkjozp+TV40TlTXoO7UHAZBufkn4P1fZoEltmGtbw6sfTGduhC4P7Wjj8zu70lwtyoSE6txSIiPalEvgyHOuu6wgV03RJ13v61O4TV/Shaica0Q4feqP6jOc/ocku0CpKeVwYCrIFrsbOgRI7OqRkWfC1ZN+OA98mKjtWJpUpm0+cjHgU3LAkM=
----
-
-
-
 # QXZ-section-parser
 
 QXZ 纯自主研发编程语言 + QZ 运行时框架。
