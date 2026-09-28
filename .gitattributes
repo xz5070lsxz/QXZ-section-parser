@@ -1,0 +1,3 @@
+# QXZ 语言扩展名映射（GitHub Linguist 展示用）
+*.qzm linguist-language=Java
+*.qxz linguist-language=Java
