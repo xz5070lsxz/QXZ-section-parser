@@ -81,4 +81,4 @@ section app_config {
 print(app_config["name"]);
 ```
 
-详见 [docs/QXZ语法规范-V1.1.md](docs/QXZ语法规范-V1.1.md)。
+详见 [docs/QXZ语法规范-V1.1.md](docs/QXZ语法规范.md)。
