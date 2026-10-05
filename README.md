@@ -35,7 +35,7 @@ QXZ-section-parser/
 
 ## 快速开始
 
-依赖：JDK 17+（或使用项目内置的免安装 JDK）。
+依赖：JDK 17+（build.sh 优先使用仓库上级 tools/ 下的免安装 JDK，不存在时回退系统 JDK）。
 
 ```bash
 # 构建
