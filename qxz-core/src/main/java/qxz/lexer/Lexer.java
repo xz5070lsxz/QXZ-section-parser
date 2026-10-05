@@ -36,6 +36,7 @@ public class Lexer {
         KEYWORDS.put("true", TokenType.TRUE);
         KEYWORDS.put("false", TokenType.FALSE);
         KEYWORDS.put("null", TokenType.NULL);
+        KEYWORDS.put("ui", TokenType.UI);
     }
 
     public Lexer(String source) {

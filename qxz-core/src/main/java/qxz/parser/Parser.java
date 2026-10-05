@@ -5,7 +5,9 @@ import qxz.lexer.Token;
 import qxz.lexer.TokenType;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * QXZ 递归下降语法分析器。
@@ -55,6 +57,7 @@ public class Parser {
         if (match(TokenType.BREAK)) { consumeSemi(); return new Break(); }
         if (match(TokenType.CONTINUE)) { consumeSemi(); return new Continue(); }
         if (match(TokenType.LBRACE)) return block();
+        if (match(TokenType.UI)) return uiStmt();
         if (t.type == TokenType.IDENTIFIER && peekNext().type == TokenType.IDENTIFIER) {
             // section 块：section name { ... }
             return sectionStmt();
@@ -184,6 +187,56 @@ public class Parser {
         }
         consume(TokenType.RBRACE, "section 块后需要 '}'");
         return new Section(name.lexeme, entries);
+    }
+
+    // ============ UI 声明 ============
+
+    private Stmt uiStmt() {
+        Token name = consume(TokenType.IDENTIFIER, "ui 后需要界面名称");
+        consume(TokenType.LBRACE, "ui " + name.lexeme + " 后需要 '{'");
+        Map<String, Expr> rootProps = new LinkedHashMap<>();
+        List<UiNode> nodes = new ArrayList<>();
+        while (!check(TokenType.RBRACE) && !isAtEnd()) {
+            if (check(TokenType.IDENTIFIER) && peekNext().type == TokenType.COLON) {
+                // 根属性：key: value;
+                Token key = advance();
+                advance(); // COLON
+                Expr value = expression();
+                consumeSemi();
+                rootProps.put(key.lexeme, value);
+            } else {
+                nodes.add(uiNode());
+            }
+        }
+        consume(TokenType.RBRACE, "ui 块后需要 '}'");
+        return new UiDecl(name.lexeme, rootProps, nodes);
+    }
+
+    /** 解析一个 UI 节点：类型名 [节点名] { 属性/子节点 } */
+    private UiNode uiNode() {
+        Token type = consume(TokenType.IDENTIFIER, "UI 节点需要类型名（如 panel/button/text）");
+        String name = "";
+        if (check(TokenType.IDENTIFIER) && peekNext().type == TokenType.LBRACE) {
+            name = advance().lexeme;
+        }
+        consume(TokenType.LBRACE, "UI 节点 " + type.lexeme + " 后需要 '{'");
+        Map<String, Expr> props = new LinkedHashMap<>();
+        List<UiNode> children = new ArrayList<>();
+        while (!check(TokenType.RBRACE) && !isAtEnd()) {
+            if (check(TokenType.IDENTIFIER) && peekNext().type == TokenType.IDENTIFIER) {
+                // 子节点：类型名 节点名 { ... }
+                children.add(uiNode());
+            } else {
+                // 属性：key: value;
+                Token key = consume(TokenType.IDENTIFIER, "UI 属性需要键名");
+                consume(TokenType.COLON, "UI 属性 " + key.lexeme + " 后需要 ':'");
+                Expr value = expression();
+                consumeSemi();
+                props.put(key.lexeme, value);
+            }
+        }
+        consume(TokenType.RBRACE, "UI 节点 " + type.lexeme + " 后需要 '}'");
+        return new UiNode(type.lexeme, name, props, children);
     }
 
     private Stmt exprStmt() {

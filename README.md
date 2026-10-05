@@ -26,37 +26,19 @@ QXZ-section-parser/
 │       ├── Interpreter.java      # 解释器/执行引擎
 │       ├── Environment.java      # 变量作用域
 │       ├── QxzFunction.java      # 函数对象
-│       └── QzRuntimeException.java
+│       ├── QzRuntimeException.java
+│       └── ui/                   # QZ UI 引擎
+│           ├── UiNode.java       # 运行时 UI 节点
+│           ├── UiStyle.java      # 样式解析（盒模型 + 全色支持）
+│           ├── UiLayoutEngine.java # 流式盒模型布局（row/column/fill/wrap）
+│           ├── RenderCommand.java  # 渲染指令（RECT/TEXT/ICON/IMAGE）
+│           ├── UiHost.java         # 平台渲染桥接口（安卓壳适配点）
+│           └── DefaultUiHost.java  # 默认宿主（控制台指令输出）
 ├── examples/          # 示例程序（.qzm）
 ├── docs/              # 语言规范文档
 ├── build.sh           # 构建脚本
 └── README.md
 ```
-
-## 快速开始
-
-依赖：JDK 17+（build.sh 优先使用仓库上级 tools/ 下的免安装 JDK，不存在时回退系统 JDK）。
-
-```bash
-# 构建
-./build.sh
-
-# 运行 QXZ 程序
-java -cp build qxz.Main run examples/hello.qzm
-
-# 其他命令
-java -cp build qxz.Main lex <文件.qzm>   # 词法分析
-java -cp build qxz.Main ast <文件.qzm>   # 语法树
-java -cp build qxz.Main repl             # 交互式命令行
-```
-
-## 支持平台（最低要求）
-
-QXZ 全面支持耀菱生态平台级最低运行环境（对应 yaoling-driver §3.0），每个最低档系统均可运行：
-
-- **操作系统**：Android 6+ / 鸿蒙 HarmonyOS 5+ / Windows 7+ / Ubuntu 18+ / Meta 头显（均为 64 位）
-- **图形后端**：DX11+ / OpenGL 4+ / 渲染龙（RenderDragon）/ Vulkan 1.1+
-- **最低硬件**：2GB RAM / 5GB ROM / 1.5GHz 四核 CPU
 
 ## 特性
 
@@ -66,7 +48,8 @@ QXZ 全面支持耀菱生态平台级最低运行环境（对应 yaoling-driver 
 - 复合赋值与自增自减：`+=` `-=` `*=` `/=` `++` `--`
 - 注释：`//` 行注释、`/* */` 块注释、`#` 行注释
 - **section 块**（QXZ 特色）：结构化配置/数据描述，无需引号噪音
-- 标准库：print / input / len / range / type / toInt / toDouble / toString / abs / max / min / sqrt / floor / ceil
+- **ui 块**（QXZ 特色）：声明式 UI 布局，QZ UI 引擎布局渲染（row/column 流式盒模型 + 固定/fill/wrap 尺寸 + gap/padding/align/justify + 全色样式），安卓壳等平台经 UiHost 桥接绘制
+- 标准库：print / input / len / range / type / toInt / toDouble / toString / abs / max / min / sqrt / floor / ceil / **uiShow / uiScreens / uiRegister**
 
 ## 示例
 
@@ -94,4 +77,32 @@ section app_config {
 print(app_config["name"]);
 ```
 
-详见 [docs/语法规范.md](docs/语法规范.md)。
+### UI 声明（ui 块）
+
+```java
+ui main_screen {
+    direction: "row";
+    width: "fill";
+    height: "fill";
+    bg: "#FFFFFF";
+
+    panel left_menu {
+        width: 180;
+        direction: "column";
+        gap: 4;
+        bg: "#F5F5F5";
+        border: 1;
+        border_color: "#CCCCCC";
+        button about { label: "关于"; color: "#000000"; }
+    }
+
+    panel account_area {
+        width: "fill";
+        direction: "column";
+        text greeting { value: "欢迎回来"; color: "#1E88E5"; font_size: 20; bold: true; }
+        button start_game { label: "开始游戏"; bg: "#4CAF50"; color: "#FFFFFF"; height: 44; }
+    }
+}
+```
+
+详见 [docs/语法规范.md](docs/语法规范.md) §10；运行示例：`java -cp build qxz.Main run examples/ui_main_screen.qzm`。

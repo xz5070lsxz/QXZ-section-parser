@@ -1,9 +1,14 @@
 package qz.runtime;
 
 import qxz.ast.Ast;
+import qz.runtime.ui.DefaultUiHost;
+import qz.runtime.ui.UiHost;
+import qz.runtime.ui.UiLayoutEngine;
+import qz.runtime.ui.UiNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +35,11 @@ public class Interpreter {
     /** 当前激活的语言上下文（由行级语言标记驱动；null 表示未指定） */
     private String currentLanguage = null;
 
+    /** QZ UI 宿主：默认控制台调试输出，安卓壳等平台可 setUiHost 接管绘制 */
+    private UiHost uiHost = new DefaultUiHost();
+    /** 已注册的 ui 屏幕（ui 块名 -> 运行时节点树） */
+    private final Map<String, UiNode> uiScreens = new LinkedHashMap<>();
+
     public Interpreter() {
         registerStdlib();
     }
@@ -37,6 +47,39 @@ public class Interpreter {
     public LanguageRegistry registry() { return registry; }
     public JvmHost jvmHost() { return jvmHost; }
     public String currentLanguage() { return currentLanguage; }
+    public UiHost uiHost() { return uiHost; }
+    public Map<String, UiNode> uiScreens() { return uiScreens; }
+
+    /** 更换 UI 宿主（安卓壳适配时调用） */
+    public void setUiHost(UiHost host) {
+        this.uiHost = host != null ? host : new DefaultUiHost();
+    }
+
+    /** 触发布局并渲染指定屏幕；未注册则抛错 */
+    public void showUi(String screenName) {
+        UiNode root = uiScreens.get(screenName);
+        if (root == null) {
+            throw new QzRuntimeException("未注册的 UI 屏幕: " + screenName
+                    + "（可用: " + uiScreens.keySet() + "）");
+        }
+        UiLayoutEngine.LayoutResult result = new UiLayoutEngine().layout(root);
+        uiHost.show(screenName, result.width, result.height, result.commands);
+    }
+
+    /** 将 AST ui 节点递归转换为运行时节点（属性求值） */
+    private UiNode toRuntimeNode(Ast.UiNode node) {
+        Map<String, Object> props = new LinkedHashMap<>();
+        if (node.props != null) {
+            for (Map.Entry<String, Ast.Expr> e : node.props.entrySet()) {
+                props.put(e.getKey(), evaluate(e.getValue()));
+            }
+        }
+        List<UiNode> children = new ArrayList<>();
+        if (node.children != null) {
+            for (Ast.UiNode kid : node.children) children.add(toRuntimeNode(kid));
+        }
+        return new UiNode(node.type, node.name, props, children);
+    }
 
     private void registerStdlib() {
         globals.define("print", (QzNative) args -> {
@@ -115,6 +158,49 @@ public class Interpreter {
         globals.define("sqrt", (QzNative) args -> Math.sqrt(asDouble(args.get(0))));
         globals.define("floor", (QzNative) args -> (int) Math.floor(asDouble(args.get(0))));
         globals.define("ceil", (QzNative) args -> (int) Math.ceil(asDouble(args.get(0))));
+
+        // UI 标准库
+        globals.define("uiShow", (QzNative) args -> {
+            if (args.size() < 1) throw new QzRuntimeException("uiShow() 需要屏幕名称参数");
+            showUi(String.valueOf(args.get(0)));
+            return null;
+        });
+        globals.define("uiScreens", (QzNative) args -> new ArrayList<>(uiScreens.keySet()));
+        globals.define("uiRegister", (QzNative) args -> {
+            if (args.size() < 2) throw new QzRuntimeException("uiRegister() 需要屏幕名与节点树");
+            String screenName = String.valueOf(args.get(0));
+            Object tree = args.get(1);
+            UiNode root = fromConfigTree(screenName, tree);
+            uiScreens.put(screenName, root);
+            return null;
+        });
+    }
+
+    /** 将 QXZ 配置块（Map）转换为运行时 UI 节点树，用于动态注册 */
+    private UiNode fromConfigTree(String name, Object tree) {
+        if (tree instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) tree;
+            String type = map.containsKey("type") ? String.valueOf(map.get("type")) : "panel";
+            Map<String, Object> props = new LinkedHashMap<>();
+            List<UiNode> children = new ArrayList<>();
+            for (Map.Entry<?, ?> e : map.entrySet()) {
+                String key = String.valueOf(e.getKey());
+                Object val = e.getValue();
+                if ("type".equals(key)) continue;
+                if ("children".equals(key) && val instanceof List) {
+                    List<?> kids = (List<?>) val;
+                    for (int i = 0; i < kids.size(); i++) {
+                        children.add(fromConfigTree(name + "#" + i, kids.get(i)));
+                    }
+                } else if (val instanceof Map) {
+                    children.add(fromConfigTree(name + "." + key, val));
+                } else {
+                    props.put(key, val);
+                }
+            }
+            return new UiNode(type, name, props, children);
+        }
+        throw new QzRuntimeException("uiRegister 节点必须是配置块（Map）");
     }
 
     private static int asInt(Object v) {
@@ -240,6 +326,22 @@ public class Interpreter {
                 sectionMap.put(entry.key, evaluate(entry.value));
             }
             env.define(s.name, sectionMap);
+        } else if (stmt instanceof Ast.UiDecl) {
+            // ui 块：转换为运行时节点树注册，并立即布局渲染
+            Ast.UiDecl ui = (Ast.UiDecl) stmt;
+            Map<String, Object> rootProps = new LinkedHashMap<>();
+            if (ui.rootProps != null) {
+                for (Map.Entry<String, Ast.Expr> e : ui.rootProps.entrySet()) {
+                    rootProps.put(e.getKey(), evaluate(e.getValue()));
+                }
+            }
+            List<UiNode> roots = new ArrayList<>();
+            for (Ast.UiNode node : ui.nodes) roots.add(toRuntimeNode(node));
+            UiNode root = roots.size() == 1 && rootProps.isEmpty()
+                    ? roots.get(0)
+                    : new UiNode("panel", ui.name, rootProps, roots);
+            uiScreens.put(ui.name, root);
+            showUi(ui.name);
         } else if (stmt instanceof Ast.LangMarker) {
             // 行级语言标记：校验语言注册（Java/C#/C++ 统一语法体系），
             // 附加内容（如 JVM）由 QZ 作为宿主装载，而非依赖系统级 JVM

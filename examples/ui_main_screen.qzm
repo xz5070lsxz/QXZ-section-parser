@@ -1,0 +1,46 @@
+// QXZ UI 引擎示例：EXCOYZNVM 主界面（布局对齐设计稿 01/05：左菜单 + 账户区）
+// 运行: qxz run examples/ui_main_screen.qzm
+ui main_screen {
+    direction: "row";
+    width: "fill";
+    height: "fill";
+    bg: "#FFFFFF";
+
+    panel left_menu {
+        width: 180;
+        direction: "column";
+        gap: 4;
+        padding: 8;
+        bg: "#F5F5F5";
+        border: 1;
+        border_color: "#CCCCCC";
+
+        text app_title { value: "EXCOYZNVM"; bold: true; font_size: 18; color: "#333333"; align: "center"; }
+        button about { label: "关于"; bg: "#FFFFFF"; color: "#000000"; border: 1; }
+        button world { label: "世界"; bg: "#FFFFFF"; color: "#000000"; border: 1; }
+        button resource { label: "资源中心"; bg: "#FFFFFF"; color: "#000000"; border: 1; }
+        button settings { label: "设置"; bg: "#FFFFFF"; color: "#000000"; border: 1; }
+        divider div1 { }
+        button exit { label: "△ 退出"; bg: "#FFE4E1"; color: "#CC0000"; border: 1; }
+    }
+
+    panel account_area {
+        width: "fill";
+        direction: "column";
+        gap: 8;
+        padding: 16;
+        align: "stretch";
+
+        text greeting { value: "欢迎回来，矿工"; font_size: 20; color: "#1E88E5"; bold: true; }
+        panel stats_row {
+            direction: "row";
+            gap: 12;
+            height: 40;
+            text stat1 { value: "等级 12"; color: "#2E7D32"; }
+            text stat2 { value: "金币 3,280"; color: "#F9A825"; }
+            text stat3 { value: "矿石 145"; color: "#6D4C41"; }
+        }
+        button start_game { label: "开始游戏"; bg: "#4CAF50"; color: "#FFFFFF"; height: 44; font_size: 18; }
+        button continue_save { label: "继续上次存档"; bg: "#8D6E63"; color: "#FFFFFF"; height: 36; }
+    }
+}

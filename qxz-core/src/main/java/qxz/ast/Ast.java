@@ -1,6 +1,7 @@
 package qxz.ast;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * QXZ 抽象语法树（AST）节点定义。
@@ -163,6 +164,29 @@ public class Ast {
     public static class LangMarker implements Stmt {
         public final qxz.lexer.LineMarker marker;
         public LangMarker(qxz.lexer.LineMarker marker) { this.marker = marker; }
+    }
+
+    /** ui 块：声明式 UI 描述（QZ UI 引擎解析布局并渲染），顶层节点列表 */
+    public static class UiDecl implements Stmt {
+        public final String name;
+        public final Map<String, Expr> rootProps;
+        public final List<UiNode> nodes;
+        public UiDecl(String name, Map<String, Expr> rootProps, List<UiNode> nodes) {
+            this.name = name;
+            this.rootProps = rootProps;
+            this.nodes = nodes;
+        }
+    }
+
+    /** ui 块内的 UI 节点：panel/button/text/image/icon 等，可嵌套 */
+    public static class UiNode {
+        public final String type;          // 节点类型：panel/button/text/image/icon/input...
+        public final String name;          // 节点名称
+        public final Map<String, Expr> props; // 布局/样式属性：key: value;
+        public final List<UiNode> children;
+        public UiNode(String type, String name, Map<String, Expr> props, List<UiNode> children) {
+            this.type = type; this.name = name; this.props = props; this.children = children;
+        }
     }
 
     /** 结束标记：行首仅 //，指定语言执行完成本行之后结束 */

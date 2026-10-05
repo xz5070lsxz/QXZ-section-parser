@@ -1,0 +1,78 @@
+// QXZ UI 引擎示例：多屏幕 + 动态切换（uiShow/uiRegister）
+// 运行: qxz run examples/ui_dashboard.qzm
+ui top_screen {
+    direction: "column";
+    bg: "#EEEEEE";
+
+    panel title_bar {
+        height: 48;
+        direction: "row";
+        padding: 8;
+        gap: 8;
+        bg: "#263238";
+        align: "center";
+
+        text logo { value: "⛏ EXCOYZNVM"; bold: true; color: "#FFC107"; font_size: 18; }
+        spacer fill_1 { width: "fill"; }
+        button news { label: "公告"; bg: "#37474F"; color: "#ECEFF1"; }
+        button mail { label: "邮件"; bg: "#37474F"; color: "#ECEFF1"; }
+        button exit { label: "退出"; bg: "#C62828"; color: "#FFFFFF"; }
+    }
+
+    panel body {
+        direction: "row";
+        width: "fill";
+        height: "fill";
+        gap: 8;
+        padding: 8;
+
+        panel left_nav {
+            width: 140;
+            direction: "column";
+            gap: 4;
+            padding: 8;
+            bg: "#FFFFFF";
+            border: 1;
+            border_color: "#B0BEC5";
+
+            icon gem { icon: "💎"; icon_size: 24; color: "#29B6F6"; }
+            text tip { value: "快捷入口"; color: "#455A64"; }
+            button world { label: "世界"; bg: "#ECEFF1"; }
+            button center { label: "资源中心"; bg: "#ECEFF1"; }
+            button setting { label: "设置"; bg: "#ECEFF1"; }
+        }
+
+        panel content {
+            width: "fill";
+            height: "fill";
+            direction: "column";
+            gap: 6;
+            padding: 12;
+            bg: "#FAFAFA";
+            border: 1;
+            border_color: "#CFD8DC";
+
+            text title { value: "欢迎，矿工"; font_size: 22; bold: true; color: "#1A237E"; }
+            text sub { value: "今日任务：收集 30 个铁矿石"; color: "#546E7A"; }
+            divider div_1 { }
+            input search_box { hint: "搜索物品…"; bg: "#FFFFFF"; border: 1; border_color: "#90A4AE"; height: 34; }
+            button go_quest { label: "前往任务点"; bg: "#FF9800"; color: "#FFFFFF"; height: 40; }
+        }
+    }
+
+    text footer { value: "EXCOYZNVM v1.4.0  |  QXZ UI 引擎"; color: "#78909C"; font_size: 12; align: "center"; }
+}
+
+ui info_screen {
+    direction: "column";
+    bg: "#FFFFFF";
+    padding: 24;
+    gap: 8;
+
+    text headline { value: "设置"; font_size: 20; bold: true; color: "#212121"; }
+    button back { label: "返回主界面"; bg: "#E0E0E0"; color: "#212121"; }
+}
+
+// 动态切换演示
+print("已注册屏幕: " + uiScreens());
+uiShow("top_screen");

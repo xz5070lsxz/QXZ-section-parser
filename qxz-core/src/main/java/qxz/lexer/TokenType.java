@@ -15,6 +15,7 @@ public enum TokenType {
     WHILE, FOR,
     RETURN, BREAK, CONTINUE,
     AND, OR, NOT,
+    UI,        // ui 声明 UI 界面（QZ UI 引擎）
 
     // 行级语言标记
     LANG_HEADER, // 行首 //语言 版本 [附加内容 附加内容版本]（严格模式，如 //Java 25 JVM 25）
