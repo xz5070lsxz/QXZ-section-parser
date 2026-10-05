@@ -2,7 +2,8 @@ package qxz.lexer;
 
 /**
  * QXZ 语言的 Token 类型定义。
- * 语法风格基于 Java / C++ / C# 家族（类 C 语法）。
+ * 语法体系、中间表示（AST）与运行时均由 QXZ 自主设计实现，不基于、不继承任何既有语言；
+ * 可兼容解析类 C 风格书写习惯（解析能力，非语言依赖）。
  */
 public enum TokenType {
     // 字面量
