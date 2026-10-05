@@ -2,6 +2,7 @@ package qxz;
 
 import qxz.ast.Ast;
 import qxz.lexer.Lexer;
+import qxz.lexer.LineMarker;
 import qxz.lexer.Token;
 import qxz.parser.LanguageHeader;
 import qxz.parser.Parser;
@@ -67,17 +68,28 @@ public class Main {
 
     private static void runFile(String path) throws IOException {
         String source = Files.readString(Path.of(path), StandardCharsets.UTF_8);
+
+        // 行级语言标记概览（严格模式：//语言 版本 [附加内容 附加内容版本]；行首仅 // 为结束标记）
+        List<LineMarker> markers = LanguageHeader.parseLineMarkers(source);
+        for (LineMarker m : markers) {
+            System.out.println("[行级标记] " + m);
+        }
+
+        // 首行声明头（v1.0 兼容）：Java / C# / C++ 同属 QXZ 统一语法体系，由 QZ 执行
         LanguageHeader header = LanguageHeader.parse(source);
         if (header != null) {
-            if (!"java".equalsIgnoreCase(header.language)) {
+            String lang = header.language.toLowerCase();
+            if (!("java".equals(lang) || "c++".equals(lang) || "c#".equals(lang))) {
                 System.err.println("[语法声明] QZ 未注册语法解析器: " + header);
-                System.err.println("QXZ v1 内置 Java 风格语法；" + header.language
+                System.err.println("QXZ 内置 Java / C# / C++ 统一语法体系；" + header.language
                         + " 语法需要 QZ 扩展模块支持");
                 System.exit(1);
             }
-            System.out.println("[语法声明] " + header + " → 使用 Java 风格解析器");
+            System.out.println("[语法声明] " + header + " → QXZ 统一语法解析器（QZ 执行）");
         }
-        // 头部本身是 // 注释，词法层自动忽略，直接全文件解析
+
+        // 头部 / 行级标记本身是 // 注释，词法层已识别为 LANG_HEADER / LANG_END，
+        // 普通注释自动忽略，直接全文件解析
         List<Token> tokens = new Lexer(source).scanTokens();
         List<Ast.Stmt> statements = new Parser(tokens).parse();
         new Interpreter().execute(statements);

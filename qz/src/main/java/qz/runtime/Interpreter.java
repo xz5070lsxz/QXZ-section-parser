@@ -23,9 +23,20 @@ public class Interpreter {
     private Environment env = globals;
     private final java.util.Scanner scanner = new java.util.Scanner(System.in);
 
+    /** QZ 语言解析器注册表：Java / C# / C++ 统一语法体系由 QZ 注册执行 */
+    private final LanguageRegistry registry = new LanguageRegistry();
+    /** QZ JVM 宿主：鸿蒙 5+ 无系统级 JVM，由 QZ 装载（行级标记附加内容 //Java 25 JVM 25） */
+    private final JvmHost jvmHost = new JvmHost();
+    /** 当前激活的语言上下文（由行级语言标记驱动；null 表示未指定） */
+    private String currentLanguage = null;
+
     public Interpreter() {
         registerStdlib();
     }
+
+    public LanguageRegistry registry() { return registry; }
+    public JvmHost jvmHost() { return jvmHost; }
+    public String currentLanguage() { return currentLanguage; }
 
     private void registerStdlib() {
         globals.define("print", (QzNative) args -> {
@@ -229,6 +240,15 @@ public class Interpreter {
                 sectionMap.put(entry.key, evaluate(entry.value));
             }
             env.define(s.name, sectionMap);
+        } else if (stmt instanceof Ast.LangMarker) {
+            // 行级语言标记：校验语言注册（Java/C#/C++ 统一语法体系），
+            // 附加内容（如 JVM）由 QZ 作为宿主装载，而非依赖系统级 JVM
+            Ast.LangMarker lm = (Ast.LangMarker) stmt;
+            registry.activate(lm.marker, jvmHost);
+            currentLanguage = lm.marker.language;
+        } else if (stmt instanceof Ast.LangEnd) {
+            // 结束标记：指定语言执行完成本行之后结束
+            currentLanguage = null;
         } else {
             throw new QzRuntimeException("未知的语句类型: " + stmt.getClass().getSimpleName());
         }

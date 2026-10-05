@@ -16,6 +16,10 @@ public enum TokenType {
     RETURN, BREAK, CONTINUE,
     AND, OR, NOT,
 
+    // 行级语言标记
+    LANG_HEADER, // 行首 //语言 版本 [附加内容 附加内容版本]（严格模式，如 //Java 25 JVM 25）
+    LANG_END,    // 行首仅 //：结束标记，指定语言执行完成本行之后结束
+
     // 运算符
     PLUS, MINUS, STAR, SLASH, PERCENT,
     EQ, NEQ, LT, LTE, GT, GTE,

@@ -34,6 +34,10 @@ public class Parser {
 
     private Stmt declaration() {
         try {
+            // 行级语言标记：//语言 版本 [附加内容 附加内容版本] → LangMarker
+            if (match(TokenType.LANG_HEADER)) return new LangMarker(previous().marker);
+            // 结束标记：行首仅 // → LangEnd
+            if (match(TokenType.LANG_END)) return new LangEnd(previous().line);
             return statement();
         } catch (RuntimeException e) {
             throw e;

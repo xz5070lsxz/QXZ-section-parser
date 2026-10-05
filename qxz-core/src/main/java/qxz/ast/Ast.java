@@ -158,4 +158,16 @@ public class Ast {
         public final Expr value;
         public SectionEntry(String key, Expr value) { this.key = key; this.value = value; }
     }
+
+    /** 行级语言标记：//语言 版本 [附加内容 附加内容版本]（如 //Java 25 JVM 25） */
+    public static class LangMarker implements Stmt {
+        public final qxz.lexer.LineMarker marker;
+        public LangMarker(qxz.lexer.LineMarker marker) { this.marker = marker; }
+    }
+
+    /** 结束标记：行首仅 //，指定语言执行完成本行之后结束 */
+    public static class LangEnd implements Stmt {
+        public final int line;
+        public LangEnd(int line) { this.line = line; }
+    }
 }

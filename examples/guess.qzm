@@ -1,0 +1,23 @@
+# QXZ 猜数字小游戏
+# 演示：随机数、循环、条件、输入输出
+
+let secret = 42;
+let guess = -1;
+let attempts = 0;
+
+print("=== QXZ 猜数字游戏 ===");
+print("我已经想好了一个 1~100 之间的数字，你来猜！");
+
+while (guess != secret) {
+    attempts++;
+    print("第", attempts, "次猜测，请输入数字:");
+    guess = toInt(input());
+
+    if (guess < secret) {
+        print("太小了！");
+    } elif (guess > secret) {
+        print("太大了！");
+    } else {
+        print("恭喜你！猜对了，用了", attempts, "次。");
+    }
+}

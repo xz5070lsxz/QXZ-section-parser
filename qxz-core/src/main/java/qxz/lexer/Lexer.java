@@ -79,7 +79,7 @@ public class Lexer {
                 addToken(match('=') ? TokenType.STAR_ASSIGN : TokenType.STAR, null);
                 break;
             case '/':
-                if (match('/')) { while (peek() != '\n' && !isAtEnd()) advance(); }
+                if (match('/')) { lineComment(); }
                 else if (match('*')) { blockComment(); }
                 else addToken(match('=') ? TokenType.SLASH_ASSIGN : TokenType.SLASH, null);
                 break;
@@ -118,6 +118,37 @@ public class Lexer {
                 else if (isAlpha(c)) identifier();
                 else throw error("意外的字符 '" + c + "'");
         }
+    }
+
+    /**
+     * 行注释处理：仅当 // 位于行首（前导空白除外）且内容符合严格模式时，
+     * 产出行级语言标记 LANG_HEADER 或结束标记 LANG_END；否则视为普通注释跳过。
+     */
+    private void lineComment() {
+        int commentStart = current; // // 之后的注释文本起点
+        while (peek() != '\n' && !isAtEnd()) advance();
+        String text = src.substring(commentStart, current);
+        if (isLineStart()) {
+            LineMarker marker = LineMarker.parseComment(text, line);
+            if (marker != null && marker.isEndMarker()) {
+                addToken(TokenType.LANG_END, null, marker);
+            } else if (marker != null) {
+                addToken(TokenType.LANG_HEADER, null, marker);
+            }
+        }
+        // 普通注释（或不符合严格模式的行）不产出 token，直接跳过
+    }
+
+    /** 判断 start（// 第一个斜杠）之前到本行行首是否全为空白 */
+    private boolean isLineStart() {
+        int i = start - 1;
+        while (i >= 0 && src.charAt(i) != '\n') {
+            if (src.charAt(i) != ' ' && src.charAt(i) != '\t' && src.charAt(i) != '\r') {
+                return false;
+            }
+            i--;
+        }
+        return true;
     }
 
     private void blockComment() {
@@ -197,8 +228,12 @@ public class Lexer {
     }
 
     private void addToken(TokenType type, Object literal) {
+        addToken(type, literal, null);
+    }
+
+    private void addToken(TokenType type, Object literal, LineMarker marker) {
         String text = src.substring(start, current);
-        tokens.add(new Token(type, text, literal, line, column - (current - start)));
+        tokens.add(new Token(type, text, literal, line, column - (current - start), marker));
     }
 
     private static boolean isDigit(char c) { return c >= '0' && c <= '9'; }

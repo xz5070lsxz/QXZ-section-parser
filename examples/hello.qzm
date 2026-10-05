@@ -1,0 +1,60 @@
+# QXZ 示例：Hello World 与基础语法演示
+# 语法风格：类 Java / C++ / C#
+
+// 变量声明
+let name = "QXZ";
+let version = 1.0;
+let year = 2026;
+let enabled = true;
+
+print("Hello, " + name + "!");
+print("版本: " + version, "年份: " + year);
+
+// 函数定义
+func add(a, b) {
+    return a + b;
+}
+
+func fib(n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+print("add(3, 4) =", add(3, 4));
+print("fib(10) =", fib(10));
+
+// 循环
+let sum = 0;
+for (let i = 1; i <= 100; i++) {
+    sum += i;
+}
+print("1+2+...+100 =", sum);
+
+// while 循环
+let count = 5;
+while (count > 0) {
+    print("倒计时:", count);
+    count--;
+}
+
+// 列表
+let fruits = ["苹果", "香蕉", "橙子"];
+for (let i = 0; i < len(fruits); i++) {
+    print("水果", i + 1, ":", fruits[i]);
+}
+
+// 字符串乘法（类 Python 风格的小彩蛋）
+print("QXZ " * 3);
+
+// section 块：结构化配置描述（QXZ 特色语法）
+section app_config {
+    name: "demo";
+    version: 1.0;
+    enabled: true;
+    features: ["ui", "network"];
+}
+
+print("配置: ", app_config);
+print("配置名称:", app_config["name"]);

@@ -1,22 +1,13 @@
----
-AIGC:
-    Label: "1"
-    ContentProducer: 001191440300708461136T1XGW3
-    ProduceID: fc9cc4777fe5c58ed1ba1eb59b80943b_1ddcea32a05911f1a54f525400f8a581
-    ReservedCode1: ANUBXVFx7zZ3EOFsqn6/POoCgzNFAP4uu3hiUl3KQC88U6yAK9T3xLcEivIWbpAXLNdSO4QK/eOoX/vMZZazWG7jSm+QTC52trTN/A3uplerr4u0EcgJygyZ0uR4yDRi4+sDFnbpIbjySIRRvPf3ccQLGUVlhNVASp5FNghK+RHlmbCOtr1PfTx3EzY=
-    ContentPropagator: 001191440300708461136T1XGW3
-    PropagateID: fc9cc4777fe5c58ed1ba1eb59b80943b_1ddcea32a05911f1a54f525400f8a581
-    ReservedCode2: ANUBXVFx7zZ3EOFsqn6/POoCgzNFAP4uu3hiUl3KQC88U6yAK9T3xLcEivIWbpAXLNdSO4QK/eOoX/vMZZazWG7jSm+QTC52trTN/A3uplerr4u0EcgJygyZ0uR4yDRi4+sDFnbpIbjySIRRvPf3ccQLGUVlhNVASp5FNghK+RHlmbCOtr1PfTx3EzY=
----
-
 # QXZ-section-parser
 
-QXZ 自研编程语言 + QZ 运行时框架。
+QXZ 纯自主研发编程语言 + QZ 运行时框架。
 
 ## 项目定位
 
-- **QXZ**：多语法前端（解析层）。语法风格基于 Java / C++ / C# 家族（类 C 语法），后续可扩展 Python / GO / PHP 风格语法。各语言解析后统一编译为 QXZ 中间表示（AST）。
-- **QZ**：运行时后端（执行层）。无论什么语法写的程序，最终执行都依赖 QZ 框架。
+- **QXZ**：**纯自主研发**的编程语言。语法体系、中间表示（AST）与运行时均由 QXZ 自主设计实现，不基于、不继承任何既有语言。作为多语法前端，可解析 Java / Python / GO / PHP 等风格语法（解析能力，非语言依赖）；各语言解析后统一编译为 QXZ 中间表示（AST）。
+- **QZ**：运行时后端（执行层）。无论什么语法写的程序，最终执行都依赖 QZ 框架。✅能力方向（用户确认，2026-09-25）：**运行 Java / C# / C++ 以及 JVM 均以 QZ 为主要执行层，QXZ 语言层为次要**——QZ 具备运行 JVM 的能力，作为鸿蒙 HarmonyOS 5+（通常不允许运行系统级 JVM）上运行 Minecraft Java 等 JVM 应用的宿主方案。
+- **文件后缀**：QXZ 源码文件后缀**通常为 `.qzm`**（用户确认，2026-09-23）。
+- **行级语言标记（用户确认，2026-09-25）**：运行 **Java / C# / C++** 时三者语法书写一致；对应行前端必须以注释标记语言类型与版本——`//(语言类型) (版本)`；需附加内容（如 JVM）时用 `//(语言类型) (语言类型版本) (附加内容) (附加内容版本号)`；行首**仅 `//`** 时为**结束标记**，代表指定语言执行完成本行之后结束。
 
 即：**QXZ 负责"看得懂"，QZ 负责"跑得起来"**。
 
@@ -36,7 +27,7 @@ QXZ-section-parser/
 │       ├── Environment.java      # 变量作用域
 │       ├── QxzFunction.java      # 函数对象
 │       └── QzRuntimeException.java
-├── examples/          # 示例程序（.qxz）
+├── examples/          # 示例程序（.qzm）
 ├── docs/              # 语言规范文档
 ├── build.sh           # 构建脚本
 └── README.md
@@ -51,17 +42,25 @@ QXZ-section-parser/
 ./build.sh
 
 # 运行 QXZ 程序
-java -cp build qxz.Main run examples/hello.qxz
+java -cp build qxz.Main run examples/hello.qzm
 
 # 其他命令
-java -cp build qxz.Main lex <文件.qxz>   # 词法分析
-java -cp build qxz.Main ast <文件.qxz>   # 语法树
+java -cp build qxz.Main lex <文件.qzm>   # 词法分析
+java -cp build qxz.Main ast <文件.qzm>   # 语法树
 java -cp build qxz.Main repl             # 交互式命令行
 ```
 
+## 支持平台（最低要求）
+
+QXZ 全面支持耀菱生态平台级最低运行环境（对应 yaoling-driver §3.0），每个最低档系统均可运行：
+
+- **操作系统**：Android 6+ / 鸿蒙 HarmonyOS 5+ / Windows 7+ / Ubuntu 18+ / Meta 头显（均为 64 位）
+- **图形后端**：DX11+ / OpenGL 4+ / 渲染龙（RenderDragon）/ Vulkan 1.1+
+- **最低硬件**：2GB RAM / 5GB ROM / 1.5GHz 四核 CPU
+
 ## 特性
 
-- 类 Java/C++/C# 语法：`let` 声明变量、`func` 定义函数、`if/elif/else`、`while/for`、`break/continue`、`return`
+- 自主设计的语法体系：`let` 声明变量、`func` 定义函数、`if/elif/else`、`while/for`、`break/continue`、`return`
 - **语言声明头**：第一行 `//语法名 版本号` 声明运行语法（语法名与版本号间必须有空格），未注册语法明确报错
 - 动态类型：int / double / string / boolean / null / list / 配置块
 - 复合赋值与自增自减：`+=` `-=` `*=` `/=` `++` `--`
@@ -96,4 +95,3 @@ print(app_config["name"]);
 ```
 
 详见 [docs/语法规范.md](docs/语法规范.md)。
-*（内容由AI生成，仅供参考）*
